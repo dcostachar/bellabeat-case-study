@@ -1,0 +1,1259 @@
+---
+title: "Bellabeat Case Study: How Can a Wellness Technology Company Play It Smart?"
+author: "Charlene D'Costa"
+date: "2024-07-04"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r echo=FALSE}
+# Explicitly set a mirror for CRAN to workaround errors when knitting
+r <- getOption("repos")
+r["CRAN"] = "http://cran.us.r-project.org"
+options(repos = r)
+```
+
+# Phase 1: Ask 
+
+## 1.1 Project Overview
+Founded in 2014 by Urška Sršen and Sando Mur, Bellabeat is a technology-driven wellness company that pioneered wearables designed specifically for women. The company has rapidly expanded, establishing a global presence and launching a range of health-focused smart products through online retailers and its e-commerce platform. While Bellabeat utilizes traditional advertising, it primarily invests in digital marketing, including maintaining a strong social media presence and running video and display ads. Despite its success, Bellabeat has the potential to expand its reach and influence in the competitive smart device market. 
+
+Urška Sršen, co-founder and Chief Product Officer believes that a detailed analysis of usage data from competitor smart devices could unlock new growth opportunities for the company. This case study delves into such data to derive actionable insights to guide Bellabeat’s future marketing strategies and strengthen its market position.
+
+## 1.2 Business Task
+Analyze user engagement and behavior patterns from competitor smart devices to identify trends and insights that inform and optimize Bellabeat's marketing strategies for the Bellabeat app.
+
+## 1.3 Key Stakeholders
+* Urška Sršen: Co-founder and Chief Product Officer (CPO)
+* Sando Mur: Co-founder and Chief Executive Officer (CEO)
+* Bellabeat marketing analytics team: A team of data analysts responsible for collecting, analyzing, and reporting on data that helps guide Bellabeat’s marketing strategy.
+
+# Phase 2: Prepare
+
+## 2.1 About the Dataset
+The [Fitbit Fitness Tracker Data](https://www.kaggle.com/datasets/arashnic/fitbit?select=mturkfitbit_export_3.12.16-4.11.16) is a public dataset on Kaggle made available through Mobius. It comprises personal tracker data from ~30 Fitbit users, including output for physical activity, heart rate, and sleep monitoring. The data was collected via a survey on Amazon Mechanical Turk over a two-month period from March 12 to May 12, 2016. The variation in the data reflects the use of different Fitbit models and individual tracking preferences, offering insights into user behaviour across several tables. 
+
+## 2.2 Data Compliance and Accessibility
+The metadata confirms that the dataset is licensed under CC0: Public Domain, effectively placing the work in the public domain and removing all copyright restrictions worldwide. As it is open-sourced, anyone can copy, modify, distribute, and use the dataset, even for commercial purposes, without permission.
+
+## 2.3 Data Integrity and Credibility
+Although the dataset is sourced from a verified open-source platform, Kaggle, it presents certain limitations. It includes data from only ~30 FitBit users and lacks demographic information, which could result in sampling bias, rendering the sample potentially unrepresentative of the broader population. Additionally, the data was collected over a brief two-month period. This limited timeframe may undermine the dataset's comprehensiveness, potentially rendering it insufficient for thoroughly addressing research questions or identifying solutions without the support of supplementary datasets.
+
+## 2.4 Data Organization and Verification
+The dataset comprises 29 CSV files, each containing qualitative data on users' physical activity, heart rate, and sleep across various Fitbit models. The data is presented in long format, where each row represents a single observation. This format is evidenced by each column representing one variable (e.g., "Id", "Activity Date"), and identifiers like Id repeating across rows, yet each combination of identifiers and variables is unique.
+
+# Phase 3: Process 
+
+## 3.1 Data Reduction 
+
+After reviewing our data, we found that Month 3 includes 11 datasets while Month 4 includes 18, totaling 29 data sets. For our analysis, we will focus on the datasets common to both months. The consistent collection of these metrics across both periods allows for a greater number of observations per user, enhancing the reliability of our analysis and providing a more accurate understanding of user engagement and behavior patterns with their Fitbit devices over an extended period.
+
+We then streamlined our dataset by eliminating duplicates that contained similar types of data across different time intervals. For instance, we opted for hourly data over minute data to simplify analysis and better highlight trends over larger intervals. Additionally, we removed the weight data due to insufficient submissions---only 11 users in Month 3 and 8 in Month 4, which do not provide a robust basis for meaningful analysis. We also excluded the METs (Metabolic Equivalent of Task) dataset, considering the intensity dataset already sufficiently represents users' physical activity levels.
+
+This refinement process identified six key types of datasets, each available for both Month 3 and Month 4, totaling 12 datasets for our analysis:
+
+  * Daily Activity
+  * Hourly Calories
+  * Hourly Intensities
+  * Hourly Steps
+  * Minute Sleep
+  * Seconds Heart Rate
+
+## 3.2 Data Integration 
+
+The next step of our analysis involves importing, merging and joining the datasets from both Month 3 and Month 4. For each category---Daily Activity, Hourly Calories, Hourly Intensities, Hourly Steps, Minute Sleep, and Seconds Heart Rate---we will merge the data from the two months to create a single comprehensive dataset. 
+
+### Installing tidyverse and opening libraries
+
+```{r echo=FALSE}
+install.packages("tidyverse")
+
+library("tibble")
+library("dplyr")
+library("lubridate")
+```
+
+### Importing datasets 
+
+Month 3
+
+```{r month-3-variables, echo=FALSE}
+minute_METs_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteMETsNarrow_merged.csv")
+minute_sleep_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteSleep_merged.csv")
+minute_steps_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteStepsNarrow_merged.csv")
+weight_info_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/weightLogInfo_merged.csv")
+minute_intensities_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteIntensitiesNarrow_merged.csv")
+minute_calories_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteCaloriesNarrow_merged.csv") 
+hourly_steps_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlySteps_merged.csv")
+hourly_intensities_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlyIntensities_merged.csv")
+hourly_calories_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlyCalories_merged.csv")
+seconds_heart_rate_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/heartrate_seconds_merged.csv")
+daily_activity_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/dailyActivity_merged.csv")
+```
+
+Month 4
+
+```{r month-4-variables, echo=FALSE}
+daily_activity_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyActivity_merged.csv")
+daily_calories_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyCalories_merged.csv")
+daily_intensities_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyIntensities_merged.csv")
+daily_steps_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailySteps_merged.csv")
+seconds_heart_rate_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/heartrate_seconds_merged.csv")
+hourly_calories_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlyCalories_merged.csv")
+hourly_intensities_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlyIntensities_merged.csv")
+hourly_steps_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlySteps_merged.csv")
+minute_calories_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteCaloriesNarrow_merged.csv")
+minute_intensities_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteIntensitiesNarrow_merged.csv")
+minute_METs_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteMETsNarrow_merged.csv")
+minute_sleep_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteSleep_merged.csv")
+minute_steps_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteStepsNarrow_merged.csv")
+daily_sleep_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/sleepDay_merged.csv")
+weight_info_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/weightLogInfo_merged.csv")
+```
+
+### Merging and joining datasets 
+
+Here we will take the following actions:
+
+  1. Use the `distinct()` function to identify the number of distinct users in Month 3 and 4.
+  2. Use the `intersect()` function to identify the number of distinct users in both datasets.
+  3. Use the `union_all()` function to merge data from Month 3 and 4, ensuring compatibility by using the `names()` function to verify that the columns in both datasets are consistent and can be merged.
+  4. Use the `inner_join()` function to join all user data from Months 3 and 4 (prepared in step 3) with only the distinct users in both datasets (prepared in step 2). This ensures ensures that we include only those users who are present in both months, allowing us to analyze a full two months' worth of data per user. For further rationale, see [Section 3.1](#section-3.1). 
+
+#### daily_activity  
+
+Month 3 has 35 distinct users and Month 4 has 33 distinct users.
+
+```{r}
+distinct_users_daily_activity_month_3 <- distinct(daily_activity_month_3,Id)
+distinct_users_daily_activity_month_4 <- distinct(daily_activity_month_4,Id)
+
+knitr::kable(
+  list(distinct_users_daily_activity_month_3, distinct_users_daily_activity_month_4),
+)
+
+head(distinct_users_daily_activity_month_3)
+head(distinct_users_daily_activity_month_4)
+```
+
+Month 3 and 4 have 33 unique common users.
+
+```{r}
+unique_common_users_daily_activity = intersect(
+  distinct_users_daily_activity_month_3,
+  distinct_users_daily_activity_month_4,
+)
+
+head(unique_common_users_daily_activity)
+```
+
+Merging Months 3 and 4. 
+
+```{r}
+names(daily_activity_month_3)
+names(daily_activity_month_4)
+names(daily_activity_month_3) == names(daily_activity_month_4)
+```
+
+```{r}
+daily_activity_with_all_users = union_all(
+  daily_activity_month_3,
+  daily_activity_month_4
+)
+
+head(daily_activity_with_all_users)
+```
+Joining Months 3 and 4. 
+
+```{r}
+daily_activity = inner_join(
+  daily_activity_with_all_users,
+  unique_common_users_daily_activity,
+  by = join_by(Id)
+)
+
+head(daily_activity)
+```
+
+#### hourly_calories 
+
+Month 3 has 34 distinct users and Month 4 has 33 distinct users. 
+
+```{r}
+distinct_users_hourly_calories_month_3 <- distinct(hourly_calories_month_3,Id)
+distinct_users_hourly_calories_month_4 <- distinct(hourly_calories_month_4,Id)
+
+knitr::kable(
+  list(distinct_users_hourly_calories_month_3,distinct_users_hourly_calories_month_4),
+)
+
+head(distinct_users_hourly_calories_month_3)
+head(distinct_users_hourly_calories_month_4)
+```
+
+Month 3 and 4 have 32 unique common users. 
+
+```{r}
+unique_common_users_hourly_calories = intersect(
+  distinct_users_hourly_calories_month_3,
+  distinct_users_hourly_calories_month_4,
+)
+
+head(unique_common_users_hourly_calories)
+```
+
+Merging Months 3 and 4.
+
+```{r}
+names(hourly_calories_month_3)
+names(hourly_calories_month_4)
+names(hourly_calories_month_3) == names(hourly_calories_month_4)
+```
+
+```{r}
+hourly_calories_with_all_users = union_all(
+  hourly_calories_month_3,
+  hourly_calories_month_4
+)
+
+head(hourly_calories_with_all_users)
+```
+
+Joining Months 3 and 4.
+
+```{r}
+hourly_calories = inner_join(
+  hourly_calories_with_all_users,
+  unique_common_users_hourly_calories,
+  by = join_by(Id)
+)
+
+head(hourly_calories)
+```
+
+#### hourly_intensities
+ 
+Month 3 has 34 distinct users and Month 4 has 33 distinct users. 
+
+```{r}
+distinct_users_hourly_intensities_month_3 <- distinct(hourly_intensities_month_3,Id)
+distinct_users_hourly_intensities_month_4 <- distinct(hourly_intensities_month_4,Id)
+
+knitr::kable(
+  list(distinct_users_hourly_intensities_month_3,distinct_users_hourly_intensities_month_4),
+)
+
+head(distinct_users_hourly_intensities_month_3)
+head(distinct_users_hourly_intensities_month_4)
+```
+
+Month 3 and 4 have 32 unique common users.
+
+```{r}
+unique_common_users_hourly_intensities = intersect(
+  distinct_users_hourly_intensities_month_3,
+  distinct_users_hourly_intensities_month_4,
+)
+
+head(unique_common_users_hourly_intensities)
+```
+
+Merging Months 3 and 4.  
+
+```{r}
+names(hourly_intensities_month_3)
+names(hourly_intensities_month_4)
+names(hourly_intensities_month_3) == names(hourly_intensities_month_4)
+```
+
+
+```{r}
+hourly_intensities_with_all_users = union_all(
+  hourly_intensities_month_3,
+  hourly_intensities_month_4
+)
+
+head(hourly_intensities_with_all_users)
+```
+
+Joining Months 3 and 4.  
+
+```{r}
+hourly_intensities = inner_join(
+  hourly_intensities_with_all_users,
+  unique_common_users_hourly_intensities,
+  by = join_by(Id)
+)
+
+head(hourly_intensities)
+```
+
+#### hourly_steps
+
+Month 3 has 34 distinct users and Month 4 has 33 distinct users.
+
+```{r}
+distinct_users_hourly_steps_month_3 <- distinct(hourly_steps_month_3,Id)
+distinct_users_hourly_steps_month_4 <- distinct(hourly_steps_month_4,Id)
+
+knitr::kable(
+  list(distinct_users_hourly_steps_month_3,distinct_users_hourly_steps_month_4),
+)
+
+head(distinct_users_hourly_steps_month_3)
+head(distinct_users_hourly_steps_month_4)
+```
+
+Month 3 and 4 have 32 unique common users.
+
+```{r}
+unique_common_users_hourly_steps = intersect(
+  distinct_users_hourly_steps_month_3,
+  distinct_users_hourly_steps_month_4,
+)
+
+head(unique_common_users_hourly_steps)
+```
+
+Merging Months 3 and 4. 
+
+```{r}
+names(hourly_steps_month_3)
+names(hourly_steps_month_4)
+names(hourly_steps_month_3) == names(hourly_steps_month_4)
+```
+
+```{r}
+hourly_steps_with_all_users = union_all(
+  hourly_steps_month_3,
+  hourly_steps_month_4
+)
+
+head(hourly_steps_with_all_users)
+```
+
+Joining Months 3 and 4. 
+
+```{r}
+hourly_steps = inner_join(
+  hourly_steps_with_all_users,
+  unique_common_users_hourly_steps,
+  by = join_by(Id)
+)
+
+head(hourly_steps)
+```
+
+#### minute_sleep
+
+Month 3 has 23 distinct users and Month 4 has 24 distinct users. Although both datasets contain fewer than 30 distinct users, we will proceed with using them due to the high number of observations in each (~180,000). Also, these are the only sleep datasets that maintain consistent time intervals (minutes) across Months 3 and 4, aligning with the analysis criteria outlined in [Section 3.1](#section-3.1).
+
+```{r}
+distinct_users_minute_sleep_month_3 <- distinct(minute_sleep_month_3,Id)
+distinct_users_minute_sleep_month_4 <- distinct(minute_sleep_month_4,Id)
+
+knitr::kable(
+  list(distinct_users_minute_sleep_month_3,distinct_users_minute_sleep_month_4),
+)
+
+head(distinct_users_minute_sleep_month_3)
+head(distinct_users_minute_sleep_month_4)
+```
+
+Month 3 and 4 have 22 unique common users.
+
+```{r}
+unique_common_users_minute_sleep = intersect(
+  distinct_users_minute_sleep_month_3,
+  distinct_users_minute_sleep_month_4,
+)
+
+head(unique_common_users_minute_sleep)
+```
+
+Merging Months 3 and 4.
+
+```{r}
+names(minute_sleep_month_3)
+names(minute_sleep_month_4)
+names(minute_sleep_month_3) == names(minute_sleep_month_4)
+```
+
+```{r}
+minute_sleep_with_all_users = union_all(
+  minute_sleep_month_3,
+  minute_sleep_month_4
+)
+
+head(minute_sleep_with_all_users)
+```
+
+Joining Months 3 and 4. 
+
+```{r}
+minute_sleep = inner_join(
+  minute_sleep_with_all_users,
+  unique_common_users_minute_sleep,
+  by = join_by(Id)
+)
+
+head(minute_sleep)
+```
+
+#### seconds_heart_rate
+
+Month 3 has 14 distinct users and Month 4 has 14 distinct users. Although both datasets contain fewer than 30 distinct users, we will proceed using the same logic applied to the [Minute_Sleep](#minute-sleep) datasets.
+
+```{r}
+distinct_users_seconds_heart_rate_month_3 <- distinct(seconds_heart_rate_month_3,Id)
+distinct_users_seconds_heart_rate_month_4 <- distinct(seconds_heart_rate_month_4,Id)
+
+knitr::kable(
+  list(distinct_users_seconds_heart_rate_month_3,distinct_users_seconds_heart_rate_month_4),
+)
+
+head(distinct_users_seconds_heart_rate_month_3)
+head(distinct_users_seconds_heart_rate_month_4)
+```
+
+Month 3 and 4 have 13 unique common users.
+
+```{r}
+unique_common_users_seconds_heart_rate = intersect(
+  distinct_users_seconds_heart_rate_month_3,
+  distinct_users_seconds_heart_rate_month_4,
+)
+
+head(unique_common_users_seconds_heart_rate)
+```
+
+Merging Months 3 and 4.
+
+```{r}
+names(seconds_heart_rate_month_3)
+names(seconds_heart_rate_month_4)
+names(seconds_heart_rate_month_3) == names(seconds_heart_rate_month_4)
+```
+
+```{r}
+seconds_heart_rate_with_all_users = union_all(
+ seconds_heart_rate_month_3,
+ seconds_heart_rate_month_4
+)
+
+head(seconds_heart_rate_with_all_users)
+```
+
+Joining Months 3 and 4. 
+
+```{r}
+seconds_heart_rate = inner_join(
+  seconds_heart_rate_with_all_users,
+  unique_common_users_seconds_heart_rate,
+  by = join_by(Id)
+)
+
+head(seconds_heart_rate)
+```
+
+## 3.3 Data Cleaning 
+
+In this stage, we will clean our data to ensure it is accurate, consistent, and reliable. We will start by identifying and removing duplicate entries and investigating and handling anomalies. Next, we will handle missing values by identifying and removing them as needed. We will standardize column names to achieve consistency and ensure all date-time fields are correctly parsed. Finally, we will save our cleaned datasets, providing a solid foundation for generating accurate insights in the subsequent analysis phase.
+
+### Identify and remove duplicates 
+
+First, we will use the `count()` function to see how many rows each dataset has. Then, we will use `distinct()` and `count()` together to check for and remove any duplicate rows. 
+
+#### daily_activity
+
+0 duplicate rows 
+
+```{r}
+daily_activity |> count()
+daily_activity |> distinct() |> count()
+(daily_activity |> count()) - (daily_activity|> distinct() |> count())
+```
+
+#### hourly_calories 
+
+Removed 175 duplicate rows
+
+```{r}
+hourly_calories |> count()
+hourly_calories |> distinct() |> count()
+(hourly_calories |> count()) - (hourly_calories |> distinct() |> count())
+
+hourly_calories_distinct = hourly_calories |> distinct()
+```
+
+#### hourly_intensities
+
+Removed 175 duplicate rows
+
+```{r}
+hourly_intensities |> count()
+hourly_intensities |> distinct() |> count()
+(hourly_intensities |> count()) - (hourly_intensities|> distinct() |> count())
+
+hourly_intensities_distinct = hourly_intensities |> distinct()
+```
+
+#### hourly_steps
+
+Removed 175 duplicate rows
+
+```{r}
+hourly_steps |> count()
+hourly_steps |> distinct() |> count()
+(hourly_steps |> count()) - (hourly_steps|> distinct() |> count())
+
+hourly_steps_distinct = hourly_steps |> distinct()
+```
+
+#### minute_sleep
+
+Removed 4,300 duplicate rows 
+
+```{r}
+minute_sleep |> count()
+minute_sleep |> distinct() |> count()
+(minute_sleep |> count()) - (minute_sleep|> distinct() |> count())
+
+minute_sleep_distinct = minute_sleep |> distinct()
+```
+
+#### seconds_heart_rate
+
+Removed 23,424 duplicate rows 
+
+```{r}
+seconds_heart_rate |> count()
+seconds_heart_rate |> distinct() |> count()
+(seconds_heart_rate |> count()) - (seconds_heart_rate|> distinct() |> count())
+
+seconds_heart_rate_distinct = seconds_heart_rate |> distinct()
+```
+
+### Identify and remove duplicates based on primary key
+
+Given the nature of this dataset, we are taking an additional step to verify the removal of duplicate data by ensuring that the first two columns in each dataset---typically the Id and a date/time variation---are not duplicated. If duplicated, it could lead to multiple records of activity/sleep data for the same user on the same day/hour/minute/second, falsely inflating perceived activity/sleep levels and other metrics derived from these counts. This would skew our analysis, potentially resulting in misleading conclusions about user behaviour and trends. 
+
+To prevent this, we will take the following actions:
+
+  1. Utilizing the datasets from which the initial round of duplicates has already been removed, we will use the `group_by()` function to group the data by Id and the date/time variant.
+  2. We will then apply the `count()` and `filter()` functions to ensure that each Id and date/time combination has only one entry, specifically a count of one.
+
+#### daily_activity  
+
+48 rows where the Id and ActivityDate is duplicated
+
+```{r}
+daily_activity |> group_by(Id, ActivityDate) |> count() |> filter(n > 1) |> view()
+```
+
+We will now address the daily_activity dataset, which includes 48 rows with duplicated Id and ActivityDate entries.
+
+First, we will address the SedentaryMinutes column by taking the following actions:
+
+  1. Use the `filter()` function to identify and remove rows where SedentaryMinutes > 1440, the total number of minutes in a day. We're doing this because if a user's device reports being sedentary the entire day, it is likely because they did not wear it. Removing these entries is important as we are analyzing users' activity levels, and data from unworn devices is invalid for our analysis. 
+
+132 users whose devices reported that they were sedentary for the entire day
+
+```{r}
+daily_activity |> filter(SedentaryMinutes >= 1440) |> count()
+```
+Removing these users
+
+```{r}
+daily_activity_removing_complete_sedentary_mins <- daily_activity |> filter(SedentaryMinutes < 1440)
+```
+
+Next, we will address the TotalSteps column by taking the following actions:
+
+  1. Use the `filter()` function to identify and remove rows where TotalSteps = 0. Following the same logic as above, we assume this indicates that the user did not wear their device that day, rendering the data invalid.
+
+126 users whose devices reported 0 steps for the entire day
+
+```{r}
+daily_activity |> filter(TotalSteps == 0) |> count ()
+```
+
+Removing these users 
+
+```{r}
+daily_activity_removing_0_steps <- daily_activity_removing_complete_sedentary_mins |> filter(TotalSteps > 0)
+```
+
+We're now left with 19 users who have duplicate entries for the same day, totaling 38 rows with duplicated Id and ActivityDate entries. Upon closer inspection, we observed an inconsistency: for each duplicate record, whenever a user's device recorded a higher number of TotalSteps paradoxically showed a higher number of SedentaryMinutes. This presents a clear data anomaly, as logically, increased physical activity (indicated by a higher step count) should correspond with fewer sedentary minutes, not more. This contradiction suggests a possible error in data recording or processing, which would require further investigation. Typically, at this stage we would consult with the business or data provider to clarify the discrepancy. 
+
+However, since those options are not available, we will take the following informed actions to address this issue in the data:
+
+  1. Use the `summarise()` function to aggregate the duplicate data, selecting the maximum value for all columns except for the SedentaryMinutes column, for which we will take the minimum value. This approach ensures that we evaluate users at their most active and least sedentary states.
+
+```{r}
+daily_activity_removing_0_steps |> 
+  group_by(Id,ActivityDate) |> 
+  summarise(
+      max(TotalSteps), 
+      max(TotalDistance), 
+      max(TrackerDistance), 
+      max(LoggedActivitiesDistance), 
+      max(VeryActiveDistance), 
+      max(ModeratelyActiveDistance), 
+      max(LightActiveDistance), 
+      max(SedentaryActiveDistance), 
+      max(VeryActiveMinutes), 
+      max(FairlyActiveMinutes), 
+      max(LightlyActiveMinutes), 
+      min(SedentaryMinutes), 
+      max(Calories)
+  ) |> 
+  arrange(Id, ActivityDate) |> 
+  view()
+```
+
+#### hourly_calories 
+
+0 duplicate rows
+
+```{r}
+hourly_calories_distinct |> group_by(Id, ActivityHour) |> count() |> filter(n > 1) |> view()
+```
+
+#### hourly_intensities
+
+0 duplicate rows
+
+```{r}
+hourly_intensities_distinct |> group_by(Id, ActivityHour) |> count() |> filter(n > 1) |> view()
+```
+
+#### hourly_steps
+
+0 duplicate rows
+
+```{r}
+hourly_steps_distinct |> group_by(Id, ActivityHour) |> count() |> filter(n > 1) |> view()
+```
+
+#### minute_sleep
+
+0 duplicate rows
+
+```{r}
+minute_sleep_distinct |> group_by(Id, date) |> count() |> filter(n > 1) |> view()
+```
+
+#### seconds_heart_rate
+
+0 duplicate rows
+
+```{r}
+seconds_heart_rate_distinct |> group_by(Id, Time) |> count() |> filter(n > 1) |> view()
+```
+
+### Checking for NULL values
+
+Next we will check for NULL values.  
+
+#### daily_activity
+
+0 null values
+
+```{r}
+any(is.na(daily_activity_removing_0_steps))
+```
+
+#### hourly_calories 
+
+0 null values
+
+```{r}
+any(is.na(hourly_calories_distinct))
+```
+
+#### hourly_intensities
+
+0 null values
+
+```{r}
+any(is.na(hourly_intensities_distinct))
+```
+
+#### hourly_steps
+
+0 null values
+
+```{r}
+any(is.na(hourly_steps_distinct))
+```
+
+#### minute_sleep
+
+0 null values
+
+```{r}
+any(is.na(minute_sleep_distinct))
+```
+
+#### seconds_heart_rate
+
+0 null values
+
+```{r}
+any(is.na(seconds_heart_rate_distinct))
+```
+
+### Renaming columns
+
+Next we will correct the column names.
+
+#### daily_activity 
+
+```{r echo=FALSE}
+daily_activity_renaming_columns <- daily_activity_removing_0_steps |> 
+    group_by(Id,ActivityDate) |> 
+    summarise(
+        Total_Steps = max(TotalSteps), 
+        Total_Distance = max(TotalDistance), 
+        Tracker_Distance = max(TrackerDistance), 
+        Logged_Activities_Distance = max(LoggedActivitiesDistance), 
+        Very_Active_Distance = max(VeryActiveDistance), 
+        Moderately_Active_Distance = max(ModeratelyActiveDistance), 
+        Light_Active_Distance = max(LightActiveDistance), 
+        Sedentary_Active_Distance = max(SedentaryActiveDistance), 
+        Very_Active_Minutes = max(VeryActiveMinutes), 
+        Fairly_Active_Minutes = max(FairlyActiveMinutes), 
+        Lightly_Active_Minutes = max(LightlyActiveMinutes), 
+        Sedentary_Minutes = min(SedentaryMinutes), 
+        Calories = max(Calories)
+    ) |> rename("Activity_Date" = "ActivityDate")
+```
+
+#### hourly_calories 
+
+```{r}
+hourly_calories_renaming_columns <- hourly_calories_distinct |> 
+  rename("Activity_Hour" = "ActivityHour") |> 
+  view()
+```
+
+#### hourly_intensities
+
+```{r}
+hourly_intensities_renaming_columns <- hourly_intensities_distinct |> 
+  rename("Activity_Hour" = "ActivityHour") |> 
+  rename("Total_Intensity" = "TotalIntensity") |> 
+  rename("Average_Intensity" = "AverageIntensity") |> 
+view()
+```
+
+#### hourly_steps
+
+```{r}
+hourly_steps_renaming_columns <- hourly_steps_distinct |> 
+  rename("Activity_Hour" = "ActivityHour") |> 
+  rename("Step_Total" = "StepTotal") |> 
+  view()
+```
+
+#### minute_sleep
+
+```{r}
+minute_sleep_renaming_columns <- minute_sleep_distinct |> 
+  rename("Date" = "date") |> 
+  rename("Value" = "value") |> 
+  rename("Log_Id" = "logId") |> 
+  view()
+```
+
+#### seconds_heart_rate
+
+Columns names do not need to be corrected.
+
+### Parsing date-time fields
+
+Lastly, we will convert date-time data, currently stored as a character datatype, to a date-time datatype. We do this because character data does not support date-time operations, which can lead to errors during our analysis if not corrected. We will do this in two steps:
+
+  1. Use the `mutate()` and `mdy_hms` functions to create a new column with the parsed date-time data to verify the data is correctly converted. 
+  2. Use the `mutate()` followed by `select(-)` to replace the old column with the newly parsed date-time column and remove the old column from the table. 
+
+#### daily_activity  
+
+```{r}
+daily_activity_renaming_columns |> mutate(Parsed_Activity_Date = mdy(Activity_Date)) |> view()
+d_a_datetime <- daily_activity_renaming_columns |> mutate(Parsed_Activity_Date = mdy(Activity_Date)) |> mutate(Activity_Date = Parsed_Activity_Date) |> select(-Parsed_Activity_Date) |> view()
+```
+
+#### hourly_calories 
+
+```{r}
+hourly_calories_renaming_columns |> mutate(Parsed_Activity_Hour = mdy_hms(Activity_Hour)) |> view()
+h_c_datetime <- hourly_calories_renaming_columns |> mutate(Parsed_Activity_Hour = mdy_hms(Activity_Hour)) |> mutate(Activity_Hour = Parsed_Activity_Hour) |> select(-Parsed_Activity_Hour) |> view()
+```
+
+#### hourly_intensities
+
+```{r}
+hourly_intensities_renaming_columns |> mutate(Parsed_Activity_Hour = mdy_hms(Activity_Hour)) |> view()
+h_i_datetime <- hourly_intensities_renaming_columns |> mutate(Parsed_Activity_Hour = mdy_hms(Activity_Hour)) |> mutate(Activity_Hour = Parsed_Activity_Hour) |> select(-Parsed_Activity_Hour) |> view()
+```
+
+#### hourly_steps
+
+```{r}
+hourly_steps_renaming_columns |> mutate(Parsed_Activity_Hour = mdy_hms(Activity_Hour)) |> view()
+h_s_datetime <- hourly_steps_renaming_columns |> mutate(Parsed_Activity_Hour = mdy_hms(Activity_Hour)) |> mutate(Activity_Hour = Parsed_Activity_Hour) |> select(-Parsed_Activity_Hour) |> view()
+```
+
+#### minute_sleep
+
+```{r}
+minute_sleep_renaming_columns |> mutate(Parsed_Date = mdy_hms(Date)) |> view()
+m_s_datetime <- minute_sleep_renaming_columns |> mutate(Parsed_Date = mdy_hms(Date)) |> mutate(Date = Parsed_Date) |> select(-Parsed_Date)|> view()
+```
+
+#### seconds_heart_rate
+
+```{r}
+seconds_heart_rate_distinct |> mutate(Parsed_Time = mdy_hms(Time)) |> view()
+s_hr_datetime <- seconds_heart_rate_distinct |> mutate(Parsed_Time = mdy_hms(Time)) |> mutate(Time = Parsed_Time) |> select(-Parsed_Time)|> view()
+```
+
+### Saving cleaned datasets
+
+We will now save our cleaned datasets. Yippe! 
+
+```{r}
+daily_activity_cleaned <- d_a_datetime 
+hourly_calories_cleaned <- h_c_datetime
+hourly_intensities_cleaned <- h_i_datetime
+hourly_steps_cleaned <- h_s_datetime
+minute_sleep_cleaned <- m_s_datetime
+seconds_heart_rate_cleaned <- s_hr_datetime
+```
+
+# Phase 4: Analyze & Phase 5: Share
+
+## 4.1 Trends in User Behaviour 
+
+We'll begin our analysis by identifying trends in user behavior. 
+
+### User Activity Levels 
+
+First, we will determine the average activity level of users. Using this [resource](https://www.10000steps.org.au/articles/healthy-lifestyles/counting-steps/), we will classify users into three categories: lightly active, moderately active, and highly active.
+
+We'll begin by loading the `ggplot2` package. 
+
+```{r}
+library("ggplot2")
+```
+
+Next, we'll take the following actions: 
+
+  1. Use `group_by()` to group the daily_activity data by User Id
+  2. Use `summarise()` to calculate the mean of the Total_Steps column for each user, giving us the average daily steps for each user.
+  3. Use `mutate()` and `case_when()` to create a new column called activity_level and categorize users based on their average daily steps.
+  4. Use `count()` to count how many users are in each category. 
+
+```{r}
+activity_level <- daily_activity_cleaned |> 
+    group_by(Id) |> 
+    summarise(mean_total_steps = mean(Total_Steps)) |> 
+    mutate(activity_level = case_when(
+        mean_total_steps <= 7499 ~ "Lightly_Active",
+        mean_total_steps >= 7500 & mean_total_steps <= 9999 ~ "Moderately_Active",
+        mean_total_steps >= 10000 ~ "Highly_Active"
+    ))
+
+activity_level_count <- activity_level |> group_by(activity_level) |> count(activity_level)
+```
+
+Now we'll create a pie chart to visualize the activity level of users. 
+
+```{r}
+ggplot(activity_level_count, aes(x = "", y = n, fill = activity_level)) + 
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y") +
+  theme_void() +
+  geom_text(aes(label=n), position = position_stack(vjust = 0.5)) +
+  labs(title = "Average Activity Level", fill = "Activity Level") +
+  theme(plot.title = element_text(hjust = 0))
+```
+
+**Summary:** From this visualization we can see that the majority of users are lightly active, with fewer users being moderately active or highly active. 
+
+### User Activity by Day of the Week
+
+Next, we'll look at which days of the week users are most and least active based on their average total steps and total distance. We'll take the following actions: 
+
+  1. Use `mutate()` and `wday` to extract the day of the week from the Activity_Date column and populate it into a new column. 
+  2. Use `group_by()` to group the activity data by the day of the week 
+  3. Use `summarise()` to calculate the average total steps and total distance for each day of the week. 
+
+```{r}
+extracting_day_of_week <- daily_activity_cleaned |> 
+  mutate(day_of_week = wday(Activity_Date,label = TRUE, abbr = FALSE, week_start = 1)) |> 
+  view()
+
+activity_throughout_week <- extracting_day_of_week |> 
+  group_by(day_of_week) |> 
+  summarise(
+    avg_total_steps = mean(Total_Steps),
+    avg_total_distance = mean(Total_Distance)
+    )|> 
+  view()
+```
+
+Now we'll create a line chart to visualize user activity by day of the week. 
+
+```{r}
+ggplot(activity_throughout_week, aes(x = day_of_week, y = avg_total_steps, group = 1)) +
+  geom_line(color = "blue", size = 0.5) +
+  geom_point(color = "red", size = 1) +
+  theme_minimal() +
+  scale_y_continuous(limits = c(0, 10000), expand = c(0, 0)) +
+  labs(title = "Average Total Steps by Day of the Week",
+    x = "Day of the Week",
+    y = "Average Total Steps")
+```
+
+**Summary:** From this visualization, we can see that users are fairly consistent in their daily step counts throughout the week, with average total steps consistently above 7,000 on most days. It highlights that while there are some variations, users generally remain active every day, with Saturday being the most active day on average and Sunday being the least active day on average.
+
+### User Activity by Time of Day
+
+Now we'll look at the times of the day when users are most and least active based on their average steps per hour. We'll take the following actions: 
+
+  1. Use `mutate()` to extract the hour of the day from the Activity_Hour column and populate it into a new column. 
+  2. Use `group_by()` to group the activity data by hour 
+  3. Use `summarise()` to calculate the average steps for each hour.
+
+```{r}
+avg_hourly_steps <- hourly_steps_cleaned |> 
+  mutate(activity_hour = hour(Activity_Hour)) |>
+  group_by(activity_hour) |>
+  summarise(avg_steps = mean(Step_Total)) |>
+view()
+```
+
+Now we'll create a bar chart to visualize user activity by time of day. 
+
+```{r}
+ggplot(avg_hourly_steps, aes(x = activity_hour, y = avg_steps, fill = avg_steps)) +
+  geom_bar(stat = "identity") +
+  scale_fill_gradientn(colors = c("green", "yellow", "red")) +
+  scale_x_continuous(breaks = 0:23) +
+  theme_minimal() +
+  labs(title = "Average Steps by Hour",
+    x = "Hour of the Day",
+    y = "Average Steps",
+    fill = "Average Steps") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**Summary:** From this visualization, we can see that users are most active from 9 AM to 7 PM, with the highest average steps observed between 12-2 PM and 5-7 PM. The hours with the lowest average steps are between 10 PM and 6 AM, which is typical as these hours are generally when people sleep. 
+
+### User Quality of Sleep - Hours of Sleep per Night
+
+Now we'll analyze the quality of sleep for users by examining the average number of hours of sleep they get per day. We'll take the following actions: 
+
+  1. Use `mutate()` to create a new column Date_Only by rounding down the Date column to the start of the day using `floor_date()`.
+  2. Use `mutate()` and `case_when()` to create a new column sleep_status to categorize the sleep state based on the Value column, where:
+  
+  * Value == 1 is categorized as "Asleep"
+  * Value == 2 is categorized as "Restless"
+  * Value == 3 is categorized as "Awake"
+  
+  3. Use `group_by()` to group the data by Id, Date_Only, and sleep_status.
+  4. Use `count()` to count the number of minutes spent in each sleep state for each user per day.
+  5. Use `filter()` to keep only the rows where sleep_status is "Asleep".
+  6. Use `mutate()` to create a new column Hours by converting the count of minutes (n) to hours.
+  7. Use `group_by()` to group the sleep data by day. 
+  8. Use `summarise()` to calculate the average sleep for each day.
+
+```{r}
+daily_sleep_extracted <- minute_sleep_cleaned |>
+  mutate(Date_Only = floor_date(Date, unit = "day")) |>
+  mutate(sleep_status = case_when(
+    Value == 1 ~ "Asleep",
+    Value == 2 ~ "Restless",
+    Value == 3 ~ "Awake"
+  )) |> 
+  group_by(Id, Date_Only, sleep_status) |> 
+  count() |> 
+  filter(sleep_status == "Asleep") |> 
+  mutate(Hours = n / 60) 
+
+avg_sleep_day <- daily_sleep_extracted |> group_by(Date_Only) |> summarise(average_hours = mean(Hours))
+```
+
+Now we'll create a line chart to visualize the average hours of sleep per day. 
+
+```{r}
+ggplot(avg_sleep_day, aes(x = Date_Only, y = average_hours)) +
+  geom_line(color = "blue") +
+  geom_point(color = "red") +
+  geom_hline(yintercept = 8, linetype = "dashed", color = "red") +
+  theme_minimal() +
+  labs(title = "Average Hours of Sleep per Day",
+    x = "Date",
+    y = "Average Hours of Sleep") +
+theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+**Summary:** From this visualization, we can see that users generally sleep between 6 and 7 hours per night, with some variability. Only a few days show an average sleep duration reaching or exceeding the recommended 8-hour mark. 
+
+### User Quality of Sleep - Time Spent Asleep vs. Total Time in Bed
+
+Next, we will investigate the relationship between total time spent in bed and actual sleep time. Given our previous findings that users are not achieving the recommended 8 hours of sleep per night, this analysis will focus on the proportion of time spent awake or restless. 
+
+We'll take the following actions: 
+
+  1.Use `mutate()` to create a new column Date_Only by rounding down the Date column to the start of the day using `floor_date()`.
+  2. Use `group_by()` to organize the data by Id and Date_Only.
+  3. Use `summarise()` to calculate the number of entries for each sleep state (Asleep, Restless, Awake) and the total number of sleep entries.
+  4. Use `mutate()` to create two new columns:
+  
+    * time_spent_asleep_hrs by converting asleep_entries from minutes to hours.
+    * time_spent_in_bed_hrs by converting total_sleep_entries from minutes to hours.
+
+```{r}
+sleep_score <- minute_sleep_cleaned |>
+  mutate(Date_Only = floor_date(Date, unit = "day")) |>
+  group_by(Id, Date_Only) |>
+  summarise(
+    asleep_entries = sum(Value == 1),
+    restless_entries = sum(Value == 2),
+    awake_entries = sum(Value == 3),
+    total_sleep_entries = n()
+  ) |>
+  mutate(
+    time_spent_asleep_hrs = asleep_entries / 60,
+    time_spent_in_bed_hrs = total_sleep_entries / 60
+  )
+```
+
+Now we'll calculate the average hours spent asleep and in bed for all users. We'll take the following actions: 
+
+  1. Use `group_by()` to organize the data by Date_Only, ensuring we aggregate data on a daily basis.
+  2. Use `summarise()` to calculate the average hours spent asleep (average_hrs_asleep) and the average hours spent in bed (average_hrs_bed) for each day across all users.
+  3. Use `mutate()` to create a new column the_date by converting the Date_Only to a proper Date format with as.Date(), for easier plotting and analysis.
+
+```{r}
+average_sleep_data <- sleep_score |>
+  group_by(Date_Only) |>
+  summarise(
+    average_hrs_asleep = mean(time_spent_asleep_hrs),
+    average_hrs_bed = mean(time_spent_in_bed_hrs)
+  ) |>
+  mutate(the_date = as.Date(Date_Only))
+```
+
+Now, we'll create a line chart to visualize the comparison between the average hours users spend asleep and the total hours they spend in bed each day.
+
+```{r}
+ggplot(average_sleep_data, aes(x = the_date)) +
+    geom_line(aes(y = average_hrs_asleep, color = "Time Asleep")) +
+    geom_line(aes(y = average_hrs_bed, color = "Time in Bed")) +
+    geom_hline(yintercept = 8, linetype = "dashed", color = "red") +
+    scale_color_manual(values = c("Time Asleep" = "blue", "Time in Bed" = "green")) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title = "Average Sleep Time vs Time in Bed",
+         x = "Date",
+         y = "Hours",
+         color = "Legend") +
+    scale_x_date(date_breaks = "1 week", date_labels = "%Y-%m-%d") +
+    annotate("text", x = max(average_sleep_data$the_date), y = 8.2, label = "Recommended 8 hours", hjust = 1)
+```
+
+**Summary:** This visualization reaffirms the pattern noted previously: users consistently sleep less than the recommended 8 hours, as marked by the red dashed line. It reveals a significant gap between the time spent in bed and actual hours asleep, indicating that users require more time to unwind and transition into sleep. This discrepancy underscores the necessity of spending sufficient time in bed to reach the ideal sleep duration.
+
+## 4.2 Correlations 
+
+We'll continue our analysis by identifying correlations between different variables.
+
+### Daily Activity vs. Daily Calories 
+
+First we'll create a scatter plot to visualize the relationship between daily activity, measured by daily steps, and the calories burned by users.   
+
+```{r}
+ggplot(daily_activity_cleaned, aes(x = Total_Steps, y = Calories)) +
+  geom_point(color = "blue", alpha = 0.5) + 
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  theme_minimal() + 
+  labs(title = "Relationship Between Daily Steps and Calories",
+    x = "Total Steps",
+    y = "Calories")
+```
+
+**Summary:** From this visualization, we see a positive correlation between the total steps and the calories burned. As the number of steps increases, the calories burned also tend to increase. This relationship suggests that higher physical activity, measured by the number of steps, leads to higher energy expenditure.
+
+### Hourly Heart Rate vs. Hourly Calories 
+
+Next, we'll explore the relationship between heart rate and calories burned by users. We'll take the following actions: 
+
+  1. Use `mutate()` to create a new column Date_Hour by rounding down the Time column to the start of the hour using floor_date().
+  2. Use `group_by()` to group the data by Id and Date_Hour.
+  3. Use `summarise()` to calculate the average heart rate (Avg_Heart_Rate) for each hour.
+  4. Use `inner_join` join the hourly_calories_cleaned dataset with the hourly_heart_rate_extracted dataset. 
+
+```{r}
+ hourly_heart_rate_extracted <- seconds_heart_rate_cleaned |>
+  mutate(Date_Hour = floor_date(Time, unit = "hour")) |> 
+  group_by(Id, Date_Hour) |>
+  summarise(Avg_Heart_Rate = mean(Value)) |>
+  view()
+
+hourlycalories_hourlyheartrate_joined <- inner_join(
+  hourly_calories_cleaned,
+  hourly_heart_rate_extracted,
+  by = c("Id" = "Id", "Activity_Hour" = "Date_Hour")
+)
+```
+
+Now, we'll create a scatter plot to visualize the relationship between heart rate and calories burned by users. 
+
+```{r}
+ggplot(hourlycalories_hourlyheartrate_joined, aes(x = Calories, y = Avg_Heart_Rate)) +
+  geom_point(color = "blue", alpha = 0.5, size = 0.5) + 
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  theme_minimal() + 
+  labs(title = "Relationship Between Heart Rate and Calories",
+    x = "Calories",
+    y = "Heart Rate")
+```
+
+**Summary:** From this visualization, we see a positive correlation between heart rate and calories burned. As heart rate rises, calorie expenditure increases, as highlighted by the red regression line. This expected relationship indicates that more intense physical activity results in higher heart rates and greater calories burned. 
+
+### Hourly Intensities vs. Hourly Calories 
+
+Next, we'll explore the relationship between the level of activity intensity and calories burned by users. We'll take the following actions: 
+
+  1. User `inner_join` join the hourly_intensities_cleaned dataset with the hourly_calories_cleaned dataset.
+
+```{r}
+hourlyintensities_hourlycalories_joined <- inner_join(
+  hourly_intensities_cleaned,
+  hourly_calories_cleaned,
+  by = c("Id" = "Id", "Activity_Hour" = "Activity_Hour")
+)
+```
+
+Now, we'll create a scatter plot to visualize the relationship between activity intensity and calories burned by users. 
+
+```{r}
+ggplot(hourlyintensities_hourlycalories_joined, aes(x = Total_Intensity, y = Calories)) +
+  geom_point(color = "blue", alpha = 0.5, size = 1) +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +
+  theme_minimal() +
+  labs(title = "Relationship Between Total Intensity and Calories",
+       x = "Total Intensity",
+       y = "Calories")
+```
+
+**Summary:** From this visualization, we see a positive correlation between activity intensity and calories burned. As in previous charts, this trend demonstrates a strong relationship where higher levels of physical activity consistently lead to greater calorie burn, highlighting the significant impact of vigorous exercise on energy expenditure.
+
+## 4.3 Smart Device Usage
+
+### Daily Device Usage 
+
+Now that we've identified trends in user behavior, including activity levels and sleep, and discovered correlations between physical activity and energy expenditure, we'll conclude our analysis by examining how frequently users in our sample use their device.
+
+First, we will quantify how often users engage with their device and categorize their usage patterns. We'll take the following actions: 
+
+  1. Use `group_by()` to organize the data by user Id and activity date. This step helps filter out duplicates for accurate analysis.
+  2. Use `summarise()` to count the number of entries per day for each user. This ensures that we only consider unique daily activities for each user.
+  3. Use another `group_by()` by user Id, then summarize() to compute the total number of active days per user. This gives a clear picture of how frequently each user engages with the device.
+  4. Use `mutate()` with `case_when()` to classify users into usage frequency buckets based on the number of days they used the device:
+  
+    * High (45+ days): Users with device usage on 45 or more days.
+    * Medium-High (30+ days): Users with device usage on 30 or more days.
+    * Medium (15+ days): Users with device usage on 15 or more days.
+    * Low (0+ days): Users with any usage up to 14 days.
+
+```{r}
+daily_device_usage <- daily_activity_with_all_users |> 
+  group_by(Id, ActivityDate) |> 
+  summarise(nr_of_entries = n()) |>
+  group_by(Id) |>             
+  summarize(device_usage_days = n()) |>
+  mutate(activity_bucket = case_when(
+    device_usage_days >= 51 ~ "High (51+)",
+    device_usage_days >= 34 ~ "Medium-High (34+)",
+    device_usage_days >= 17 ~ "Medium (17+)",
+    device_usage_days >= 0 ~ "Low (0+)"
+  ))
+```
+
+Now we'll analyze the distribution of users across different activity buckets based on their device usage. We'll take the following steps: 
+
+  1. Use `group_by()` to organize the data by activity_bucket. This groups the users according to their device usage frequency categories.
+  2. Use `summarise()` to count the number of users in each activity bucket. 
+  3. Use `mutate()` to compute the percentage of users in each bucket relative to the total number of users. 
+
+```{r}
+daily_device_usage_grouped <- daily_device_usage |> 
+  group_by(activity_bucket) |> 
+  summarise(count = n()) |>
+  mutate(percentage = count / sum(count) * 100)
+```
+
+Now, we'll create a pie chart to visualize the distribution of daily device usage among users over a two-month period.  
+
+```{r}
+ggplot(daily_device_usage_grouped, aes(x = "", y = count, fill = activity_bucket)) +
+    geom_bar(stat = "identity", width = 1) +
+    coord_polar("y", start = 0) +
+    geom_text(aes(label = sprintf("%.1f%%", percentage)), position = position_stack(vjust = 0.5), color = "black", size = 3) +  
+    scale_fill_brewer(palette = "Set2") +
+    labs(title = "Daily Device Usage", fill = "Days Used") +
+    theme_void() +
+    theme(legend.position = "right")
+```
+
+**Summary:** From this visualization, we can see that a significant majority---82.9%---of users exhibit a medium-high engagement, using their device for 34+ days, demonstrating a high usage pattern. A smaller segment, 8.6%, shows medium engagement, using their device for 17+ days. Only 5.7% of users are in the low engagement category, utilizing their device for 0-16 days. The high engagement category, representing those who wore their device for more than 51 days, comprises 2.9% of the user base. This visualization emphasizes most users' predominantly high to moderate device usage throughout the study period.
+
+# Phase 6: Act 
+
+## 6.1 Final Conclusions 
+
+As noted in Section 2.3, our data had several limitations. One major challenge was the sample size. Although the dataset is described as containing data from 30 Fitbit users, our analysis in [Section 3.2](#section-3.2) revealed that the number of users that consistently shared their data across the whole two-month study period varied from 13 to 33, depending on the dataset. This small sample size is generally not statistically significant. Additionally, the absence of demographic information introduces potential sampling bias, possibly making the sample unrepresentative of the broader population. We were further constrained by the two-month time frame, which limited the dataset's comprehensiveness.
+
+An unexpected anomaly was identified in the daily_activity dataset, where duplicate Id and Activity_Date entries occurred. In these duplicates, a higher number of total steps corresponded with a higher number of sedentary minutes, which is illogical and likely due to a recording or processing error. Addressing these anomalies was crucial for ensuring our data's accuracy, consistency, and reliability. 
+
+To overcome these limitations in the future, analyzing additional datasets from competitor smart devices, such as the Apple Watch or Oura Ring, could be beneficial. These products are comparable to Bellabeat's wearable devices, and their user data would provide a more comprehensive view of smart device usage and user behavior, enhancing insights for a future study of this nature. 
+
+## 6.2 Recommendations for the Business 
+
+### Recommendation 1: "Activate Your Best Self" Ad Campaign
+**Product Positioning:**
+Since most participants in the study were lightly active, Bellabeat can launch a campaign showcasing how its app and smart devices help users transition from light to more moderate or high levels of activity. This campaign will feature tailored ads demonstrating the incremental benefits of increased activity, appealing to all customer segments. For moderately and highly active users, the campaign will highlight advanced metrics and activity tracking features of the app that enhance training effectiveness, underscoring Bellabeat’s ability to help customers of all fitness levels achieve their health and fitness goals and "activate their best self."
+
+**Diverse Demographic Targeting:**
+The campaign will also focus on reaching a broader and more diverse audience to expand the customer base, which currently consists predominantly of women. This approach will enrich the collection of varied and diverse customer data, improving insights and compensating for the lack of demographic information identified in the competitor data used in our study. 
+
+### Recommendation 2:In-App Promotions and Engagement Strategies
+**Weekend Activity Campaigns:**
+Observing that activity peaks on Saturdays and dips on Sundays, Bellabeat can launch weekend promotional campaigns that motivate users to meet step count milestones. These interactive challenges will involve progressing through different levels based on the amount of steps taken. Users will need to maintain consistent weekend activity over a period (such as a month) to advance. Each level passed earns points redeemable for Bellabeat products, effectively gamifying weekend activity to enhance overall engagement and help users reach their fitness goals quicker.
+
+### Recommendation 3: App Features and Improvements
+**Sleep Quality Improvement Features:**
+With most users failing to meet recommended sleep durations, Bellabeat can introduce or enhance features like sleep analysis and personalized sleep coaching, possibly integrating guided meditations or relaxing sleep sounds to improve sleep quality and overall health.
+
+**Heart Rate Monitoring Features:**
+Bellabeat could also enhance or introduce new heart rate monitoring features, focusing on their accuracy and the benefits they offer, especially given their proven correlation with calorie expenditure.
+
+### Recommendation 4: App Content Ideas
+**Educational Content via Wellness Tips:**
+Bellabeat can produce short-form content in the form of "Wellness Tips," available through the app. The content can focus on topics like Heart Rate and Activity, educating users on the benefits of incorporating high-intensity physical activity into their fitness regimens and its impact on calorie burn and sleep habits, leveraging data that shows the correlation between activity levels and calorie burn.
+
+**Optimizing Scheduling Times:**
+Content upload times should be optimized to coincide with peak activity hours between 12-2 PM and 5-7 PM. This strategy ensures heightened visibility and engagement, allowing users to derive maximum value from the content.
+
+### Recommendation 5: Encourage Device Usage
+**Incentives for Consistent Usage:**
+Bellabeat can offer incentives to encourage continuous use, particularly targeting the 82.9% of users who show medium to high engagement. By implementing loyalty programs and issuing rewards through the app for consistent usage, Bellabeat can promote long-term engagement.
+
+***Thank you for viewing my Google Data Analytics Certificate Case Study!***
