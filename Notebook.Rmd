@@ -73,9 +73,12 @@ The next step of our analysis involves importing, merging and joining the datase
 ```{r echo=TRUE}
 install.packages("tidyverse")
 
+library("renv")
 library("tibble")
 library("dplyr")
 library("lubridate")
+library("ggplot2")
+# renv::snapshot() # Uncomment this when running locally and you have added new libraries
 ```
 
 ### Importing datasets 
@@ -848,11 +851,7 @@ We'll begin our analysis by identifying trends in user behavior.
 
 First, we will determine the average activity level of users. Using this [resource](https://www.10000steps.org.au/articles/healthy-lifestyles/counting-steps/), we will classify users into three categories: lightly active, moderately active, and highly active.
 
-We'll begin by loading the `ggplot2` package. 
-
-```{r}
-library("ggplot2")
-```
+We'll begin by using the `ggplot2` package that we have loaded earlier. 
 
 Next, we'll take the following actions: 
 
