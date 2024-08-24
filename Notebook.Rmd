@@ -3,8 +3,12 @@ title: "Bellabeat Case Study: How Can a Wellness Technology Company Play It Smar
 author: "Charlene D'Costa"
 date: "2024-07-04"
 output:
-  pdf_document: default
-  html_document: default
+  html_document: 
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    code_folding: hide
+    df_print: paged
 ---
 
 ```{r echo=FALSE}
@@ -66,7 +70,7 @@ The next step of our analysis involves importing, merging and joining the datase
 
 ### Installing tidyverse and opening libraries
 
-```{r echo=FALSE}
+```{r echo=TRUE}
 install.packages("tidyverse")
 
 library("tibble")
@@ -78,38 +82,38 @@ library("lubridate")
 
 Month 3
 
-```{r month-3-variables, echo=FALSE}
-minute_METs_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteMETsNarrow_merged.csv")
-minute_sleep_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteSleep_merged.csv")
-minute_steps_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteStepsNarrow_merged.csv")
-weight_info_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/weightLogInfo_merged.csv")
-minute_intensities_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteIntensitiesNarrow_merged.csv")
-minute_calories_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteCaloriesNarrow_merged.csv") 
-hourly_steps_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlySteps_merged.csv")
-hourly_intensities_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlyIntensities_merged.csv")
-hourly_calories_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlyCalories_merged.csv")
-seconds_heart_rate_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/heartrate_seconds_merged.csv")
-daily_activity_month_3 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/dailyActivity_merged.csv")
+```{r month-3-variables, echo=TRUE}
+minute_METs_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteMETsNarrow_merged.csv")
+minute_sleep_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteSleep_merged.csv")
+minute_steps_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteStepsNarrow_merged.csv")
+weight_info_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/weightLogInfo_merged.csv")
+minute_intensities_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteIntensitiesNarrow_merged.csv")
+minute_calories_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/minuteCaloriesNarrow_merged.csv") 
+hourly_steps_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlySteps_merged.csv")
+hourly_intensities_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlyIntensities_merged.csv")
+hourly_calories_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/hourlyCalories_merged.csv")
+seconds_heart_rate_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/heartrate_seconds_merged.csv")
+daily_activity_month_3 = read.csv("fitbit_dataset/fitbit_export_2016:03:12-2016:04:11/dailyActivity_merged.csv")
 ```
 
 Month 4
 
-```{r month-4-variables, echo=FALSE}
-daily_activity_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyActivity_merged.csv")
-daily_calories_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyCalories_merged.csv")
-daily_intensities_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyIntensities_merged.csv")
-daily_steps_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailySteps_merged.csv")
-seconds_heart_rate_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/heartrate_seconds_merged.csv")
-hourly_calories_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlyCalories_merged.csv")
-hourly_intensities_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlyIntensities_merged.csv")
-hourly_steps_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlySteps_merged.csv")
-minute_calories_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteCaloriesNarrow_merged.csv")
-minute_intensities_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteIntensitiesNarrow_merged.csv")
-minute_METs_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteMETsNarrow_merged.csv")
-minute_sleep_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteSleep_merged.csv")
-minute_steps_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteStepsNarrow_merged.csv")
-daily_sleep_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/sleepDay_merged.csv")
-weight_info_month_4 = read.csv("~/R_Projects/Bellabeat_Case_Study/fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/weightLogInfo_merged.csv")
+```{r month-4-variables, echo=TRUE}
+daily_activity_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyActivity_merged.csv")
+daily_calories_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyCalories_merged.csv")
+daily_intensities_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailyIntensities_merged.csv")
+daily_steps_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/dailySteps_merged.csv")
+seconds_heart_rate_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/heartrate_seconds_merged.csv")
+hourly_calories_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlyCalories_merged.csv")
+hourly_intensities_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlyIntensities_merged.csv")
+hourly_steps_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/hourlySteps_merged.csv")
+minute_calories_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteCaloriesNarrow_merged.csv")
+minute_intensities_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteIntensitiesNarrow_merged.csv")
+minute_METs_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteMETsNarrow_merged.csv")
+minute_sleep_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteSleep_merged.csv")
+minute_steps_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/minuteStepsNarrow_merged.csv")
+daily_sleep_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/sleepDay_merged.csv")
+weight_info_month_4 = read.csv("fitbit_dataset/fitbit_export_2016:04:12-2016:05:12/weightLogInfo_merged.csv")
 ```
 
 ### Merging and joining datasets 
