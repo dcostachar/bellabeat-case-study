@@ -30,17 +30,22 @@ jobs:
       - name: Setup TinyTex
         uses: r-lib/actions/setup-tinytex@v2
       
-      - name: Install rmarkdown
-        run: Rscript -e 'install.packages("rmarkdown")'
+      - name: Setup renv
+        uses: r-lib/actions/setup-renv@v2
 
       - name: Render rmarkdown notebook
         run: Rscript -e 'rmarkdown::render("Notebook.Rmd")'
 
       - name: Rename html
-        run: mv Notebook.html index.html
+        run: mkdir public && mv Notebook.html public/index.html
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
+        with:
+          path: 'public'
 
       - name: Deploy to GitHub Pages
         id: deployment
