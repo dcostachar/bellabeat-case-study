@@ -70,7 +70,7 @@ The next step of our analysis involves importing, merging and joining the datase
 
 ### Installing tidyverse and opening libraries
 
-```{r echo=TRUE}
+```{r echo=FALSE}
 install.packages("tidyverse")
 
 library("renv")
@@ -1017,7 +1017,6 @@ We'll take the following actions:
   2. Use `group_by()` to organize the data by Id and Date_Only.
   3. Use `summarise()` to calculate the number of entries for each sleep state (Asleep, Restless, Awake) and the total number of sleep entries.
   4. Use `mutate()` to create two new columns:
-  
     * time_spent_asleep_hrs by converting asleep_entries from minutes to hours.
     * time_spent_in_bed_hrs by converting total_sleep_entries from minutes to hours.
 
@@ -1170,11 +1169,11 @@ First, we will quantify how often users engage with their device and categorize 
   2. Use `summarise()` to count the number of entries per day for each user. This ensures that we only consider unique daily activities for each user.
   3. Use another `group_by()` by user Id, then summarize() to compute the total number of active days per user. This gives a clear picture of how frequently each user engages with the device.
   4. Use `mutate()` with `case_when()` to classify users into usage frequency buckets based on the number of days they used the device:
-  
-    * High (45+ days): Users with device usage on 45 or more days.
-    * Medium-High (30+ days): Users with device usage on 30 or more days.
-    * Medium (15+ days): Users with device usage on 15 or more days.
-    * Low (0+ days): Users with any usage up to 14 days.
+
+      * High (45+ days): Users with device usage on 45 or more days.
+      * Medium-High (30+ days): Users with device usage on 30 or more days.
+      * Medium (15+ days): Users with device usage on 15 or more days.
+      * Low (0+ days): Users with any usage up to 14 days.
 
 ```{r}
 daily_device_usage <- daily_activity_with_all_users |> 
@@ -1237,7 +1236,7 @@ Since most participants in the study were lightly active, Bellabeat can launch a
 **Diverse Demographic Targeting:**
 The campaign will also focus on reaching a broader and more diverse audience to expand the customer base, which currently consists predominantly of women. This approach will enrich the collection of varied and diverse customer data, improving insights and compensating for the lack of demographic information identified in the competitor data used in our study. 
 
-### Recommendation 2:In-App Promotions and Engagement Strategies
+### Recommendation 2: In-App Promotions and Engagement Strategies
 **Weekend Activity Campaigns:**
 Observing that activity peaks on Saturdays and dips on Sundays, Bellabeat can launch weekend promotional campaigns that motivate users to meet step count milestones. These interactive challenges will involve progressing through different levels based on the amount of steps taken. Users will need to maintain consistent weekend activity over a period (such as a month) to advance. Each level passed earns points redeemable for Bellabeat products, effectively gamifying weekend activity to enhance overall engagement and help users reach their fitness goals quicker.
 
