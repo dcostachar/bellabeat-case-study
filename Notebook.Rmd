@@ -598,7 +598,7 @@ However, since those options are not available, we will take the following infor
 
   1. Use the `summarise()` function to aggregate the duplicate data, selecting the maximum value for all columns except for the SedentaryMinutes column, for which we will take the minimum value. This approach ensures that we evaluate users at their most active and least sedentary states.
 
-```{r}
+```{r echo=FALSE}
 daily_activity_removing_0_steps |> 
   group_by(Id,ActivityDate) |> 
   summarise(
@@ -895,7 +895,7 @@ Next, we'll look at which days of the week users are most and least active based
   2. Use `group_by()` to group the activity data by the day of the week 
   3. Use `summarise()` to calculate the average total steps and total distance for each day of the week. 
 
-```{r}
+```{r echo=FALSE}
 extracting_day_of_week <- daily_activity_cleaned |> 
   mutate(day_of_week = wday(Activity_Date,label = TRUE, abbr = FALSE, week_start = 1)) |> 
   view()
@@ -1013,12 +1013,13 @@ Next, we will investigate the relationship between total time spent in bed and a
 
 We'll take the following actions: 
 
-  1.Use `mutate()` to create a new column Date_Only by rounding down the Date column to the start of the day using `floor_date()`.
+  1. Use `mutate()` to create a new column Date_Only by rounding down the Date column to the start of the day using `floor_date()`.
   2. Use `group_by()` to organize the data by Id and Date_Only.
   3. Use `summarise()` to calculate the number of entries for each sleep state (Asleep, Restless, Awake) and the total number of sleep entries.
   4. Use `mutate()` to create two new columns:
-    * time_spent_asleep_hrs by converting asleep_entries from minutes to hours.
-    * time_spent_in_bed_hrs by converting total_sleep_entries from minutes to hours.
+
+      * time_spent_asleep_hrs by converting asleep_entries from minutes to hours.
+      * time_spent_in_bed_hrs by converting total_sleep_entries from minutes to hours.
 
 ```{r}
 sleep_score <- minute_sleep_cleaned |>
