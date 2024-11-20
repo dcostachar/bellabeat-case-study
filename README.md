@@ -1,9 +1,9 @@
-## Bellabeat Case Study: How Can a Wellness Technology Company Play It Smart?
+# Bellabeat Case Study: How Can a Wellness Technology Company Play It Smart?
 Author: Charlene D'Costa <br />
 Date: August 15, 2024 <br />
 Capstone project for the Google Data Analytics Professional Certificate. <br />
 
-## Project Overview 
+# Project Overview 
 
 **This case study analyzes Fitbit Fitness Tracker data to develop a data-driven marketing strategy for Bellabeat, a leading manufacturer of health-focused smart devices for women.**
 
