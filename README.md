@@ -1,6 +1,6 @@
 # Bellabeat Case Study: How Can A Wellness Technology Company Play It Smart?
 Author: Charlene D'Costa <br />
-Date: August 15, 2024 <br />
+Date: July 4, 2024 <br />
 Capstone project for the Google Data Analytics Professional Certificate. <br />
 
 # Project Overview 
